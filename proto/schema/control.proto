@@ -23,10 +23,4 @@ message TransferConsent {
   string reason = 2;
 }
 
-//message TransferRequest {
-//  string transfer_id = 1;
-//  FileMetadataList files = 2;
-//  string sender_name = 3;
-//  string sender_device_id = 4;
-//}
 
