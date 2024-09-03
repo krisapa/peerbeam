@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package peerbeam.control;
+
+option go_package = "github.com/ksp237/peerbeam/proto/compiled/controlpb";
+
+message FileMetadata {
+  string transfer_id = 1;
+  string file_name = 2;
+  int64 file_size = 3;
+  bool is_directory = 4;
+//  string file_type = 4; // MIME type: image/png, application/pdf
+//  int32 file_count = 4;
+}
+
+message FileMetadataList {
+  string list_id = 1;
+  repeated FileMetadata files = 2;
+}
+
+message TransferConsent {
+  bool consent = 1;
+  string reason = 2;
+}
+
+//message TransferRequest {
+//  string transfer_id = 1;
+//  FileMetadataList files = 2;
+//  string sender_name = 3;
+//  string sender_device_id = 4;
+//}
+
