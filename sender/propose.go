@@ -10,8 +10,6 @@ import (
 )
 
 func (s *Sender) proposeTransfer(ftList []fileTransfer) error {
-	fmt.Println("Channel Opened (proposeTransfer beginning)")
-
 	fileMDList := &controlpb.FileMetadataList{
 		Files: make([]*controlpb.FileMetadata, 0, len(ftList)),
 	}

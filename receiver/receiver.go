@@ -35,8 +35,10 @@ func (r *Receiver) ReceiveFiles(destPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Copy the answer and send it to the sender:")
-	fmt.Println(answer)
+
+	utils.CopyGeneratedSDPPrompt(answer)
+	fmt.Println("Send the answer to the sender.")
+
 	<-r.DataChOpen
 	fileMDList, err := r.consentToReceive()
 	if err != nil {

@@ -60,8 +60,9 @@ func (s *Sender) SendFiles(files []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Copy the offer and send it to the receiver:")
-	fmt.Println(offer)
+
+	utils.CopyGeneratedSDPPrompt(offer)
+	fmt.Println("Send the offer to the receiver.")
 
 	remoteSDP := utils.InputSDPPrompt()
 	err = s.AddRemote(remoteSDP)

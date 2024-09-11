@@ -22,7 +22,7 @@ func main() {
 	}
 	var app = &cli.App{
 		Name:                 "peerbeam",
-		Usage:                "A simple p2p file transfer tool powered by WebRTC",
+		Usage:                "A simple and secure p2p file transfer tool powered by WebRTC",
 		EnableBashCompletion: true,
 		Commands: []*cli.Command{
 			{

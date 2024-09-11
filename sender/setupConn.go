@@ -1,7 +1,6 @@
 package sender
 
 import (
-	"fmt"
 	"github.com/pion/webrtc/v4"
 )
 
@@ -12,7 +11,6 @@ func (s *Sender) setupDataCh() error {
 	}
 	s.DataCh = channel
 	s.DataCh.OnOpen(func() {
-		fmt.Println("Control Channel Opened")
 		s.DataChOpen <- struct{}{}
 	})
 	s.DataCh.OnClose(func() {
@@ -20,7 +18,6 @@ func (s *Sender) setupDataCh() error {
 	})
 
 	s.DataCh.OnMessage(func(msg webrtc.DataChannelMessage) {
-		fmt.Println("Message Received")
 		s.MsgCh <- &msg
 	})
 

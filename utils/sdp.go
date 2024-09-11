@@ -74,3 +74,8 @@ func InputSDPPrompt() *webrtc.SessionDescription {
 		}
 	}
 }
+
+func CopyGeneratedSDPPrompt(sdp string) {
+	clipboard.Write(clipboard.FmtText, []byte(sdp))
+	fmt.Println("SDP copied to clipboard.")
+}
