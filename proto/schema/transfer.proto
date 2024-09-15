@@ -5,11 +5,10 @@ package peerbeam.transfer;
 option go_package = "github.com/ksp237/peerbeam/proto/compiled/transferpb";
 
 
-message File {
+message FileBlock {
   string transfer_id = 1;
   bytes data = 2;
-  bool is_compress = 3;
-  bool is_encrypt = 4;
+  bool is_last_block = 3;
 }
 
 message TransferComplete {
