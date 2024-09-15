@@ -11,6 +11,11 @@ message FileBlock {
   bool is_last_block = 3;
 }
 
+message TransferStart {
+  string transfer_id = 1;
+  bool is_compressed = 2;
+}
+
 message TransferComplete {
   string transfer_id = 1;
   bool success = 2;
