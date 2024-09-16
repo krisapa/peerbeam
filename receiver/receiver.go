@@ -11,13 +11,18 @@ type Receiver struct {
 	*conn.Session
 }
 
+func StartReceiver(destPath string) error {
+	receiver := New()
+	return receiver.Receive(destPath)
+}
+
 func New() *Receiver {
 	return &Receiver{
 		Session: conn.New(),
 	}
 }
 
-func (r *Receiver) ReceiveFiles(destPath string) error {
+func (r *Receiver) Receive(destPath string) error {
 	defer r.CtxCancel()
 	err := r.SetupPeerConn()
 	if err != nil {
@@ -25,6 +30,7 @@ func (r *Receiver) ReceiveFiles(destPath string) error {
 	}
 
 	candidatePromise := webrtc.GatheringCompletePromise(r.Conn)
+	fmt.Println("Copy the sender's offer to the clipboard and press enter.")
 	remoteSDP := utils.InputSDPPrompt()
 	r.addChHandler()
 	err = r.AddRemote(remoteSDP)
@@ -37,7 +43,7 @@ func (r *Receiver) ReceiveFiles(destPath string) error {
 	}
 
 	utils.CopyGeneratedSDPPrompt(answer)
-	fmt.Println("Send the answer to the sender.")
+	fmt.Println("Answer copied to clipboard. Send the answer to the sender.")
 
 	<-r.DataChOpen
 	fileMDList, err := r.consentToReceive()

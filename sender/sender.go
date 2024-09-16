@@ -14,6 +14,11 @@ type Sender struct {
 	*conn.Session
 }
 
+func StartSender(files []string) error {
+	sender := New()
+	return sender.Send(files)
+}
+
 func New() *Sender {
 	return &Sender{
 		Session: conn.New(),
@@ -26,27 +31,14 @@ type fileTransfer struct {
 	fileInfo     os.FileInfo
 }
 
-func (s *Sender) SendFiles(files []string) error {
+func (s *Sender) Send(files []string) error {
 	defer s.CtxCancel()
-
-	ftList := make([]fileTransfer, 0, len(files))
-	for _, relFP := range files {
-		fp, err := filepath.Abs(relFP)
-		if err != nil {
-			return fmt.Errorf("error with file '%s': %v", relFP, err)
-		}
-		fi, err := os.Stat(fp)
-		if err != nil {
-			return fmt.Errorf("error with file '%s': %v", fp, err)
-		}
-		ftList = append(ftList, fileTransfer{
-			transferUUID: uuid.New(),
-			filePath:     fp,
-			fileInfo:     fi,
-		})
+	ftList, err := parseFiles(files)
+	if err != nil {
+		return err
 	}
 
-	err := s.SetupPeerConn()
+	err = s.SetupPeerConn()
 	if err != nil {
 		return err
 	}
@@ -62,8 +54,8 @@ func (s *Sender) SendFiles(files []string) error {
 	}
 
 	utils.CopyGeneratedSDPPrompt(offer)
-	fmt.Println("Send the offer to the receiver.")
-
+	fmt.Println("1. Offer copied to clipboard. Share it with the receiver.")
+	fmt.Println("2. Copy the receiver's answer and press Enter.")
 	remoteSDP := utils.InputSDPPrompt()
 	err = s.AddRemote(remoteSDP)
 	if err != nil {
@@ -76,7 +68,6 @@ func (s *Sender) SendFiles(files []string) error {
 		return err
 	}
 
-	fmt.Println("Consent received, sending files...")
 	err = s.sendFiles(ftList)
 	if err != nil {
 		return err
@@ -103,4 +94,24 @@ func (s *Sender) CreateOffer() (string, error) {
 	}
 
 	return encodedSDP, nil
+}
+
+func parseFiles(files []string) ([]fileTransfer, error) {
+	ftList := make([]fileTransfer, 0, len(files))
+	for _, relFP := range files {
+		fp, err := filepath.Abs(relFP)
+		if err != nil {
+			return nil, fmt.Errorf("error with file '%s': %v", relFP, err)
+		}
+		fi, err := os.Stat(fp)
+		if err != nil {
+			return nil, fmt.Errorf("error with file '%s': %v", fp, err)
+		}
+		ftList = append(ftList, fileTransfer{
+			transferUUID: uuid.New(),
+			filePath:     fp,
+			fileInfo:     fi,
+		})
+	}
+	return ftList, nil
 }

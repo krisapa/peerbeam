@@ -31,7 +31,7 @@ func (s *Sender) proposeTransfer(ftList []fileTransfer) error {
 		return err
 	}
 
-	fmt.Println("Waiting for response to accept the transfer...")
+	fmt.Println("Waiting for receiver to accept the transfer...")
 	err = s.consentCheck()
 	if err != nil {
 		return err

@@ -5,8 +5,6 @@ PeerBeam is a CLI file transfer app powered by WebRTC. It establishes a direct, 
 - **Direct P2P File Transfer**: WebRTC NAT traversal can connect two clients that are both behind NATs and firewalls without any port forwarding
 - **STUN Server**: Uses Google's public STUN server to retrieve public IP address, port, and NAT type information
 
-⚠️ **Warning:** PeerBeam is under active development, and the API is not yet stable. Breaking changes may occur, so use with caution.
-
 [xkcd: File Transfer](https://xkcd.com/949/)
 
 ## Installation

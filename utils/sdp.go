@@ -61,21 +61,16 @@ func DecodeSDP(in string) (*webrtc.SessionDescription, error) {
 
 func InputSDPPrompt() *webrtc.SessionDescription {
 	for {
-		fmt.Println("Copy the remote SDP to your clipboard, then press Enter for the program to read it.")
 		fmt.Scanln()
-
 		clipBytes := clipboard.Read(clipboard.FmtText)
-
-		remoteSDP, err := DecodeSDP(string(clipBytes))
-		if err != nil {
-			fmt.Println("Error decoding SDP:", err)
-		} else {
+		if remoteSDP, err := DecodeSDP(string(clipBytes)); err == nil {
+			fmt.Println("SDP successfully read.")
 			return remoteSDP
 		}
+		fmt.Println("Invalid SDP. Ensure it's copied to your clipboard and press Enter.")
 	}
 }
 
 func CopyGeneratedSDPPrompt(sdp string) {
 	clipboard.Write(clipboard.FmtText, []byte(sdp))
-	fmt.Println("SDP copied to clipboard.")
 }
