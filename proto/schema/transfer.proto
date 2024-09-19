@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package peerbeam.transfer;
 
-option go_package = "github.com/ksp237/peerbeam/proto/compiled/transferpb";
+option go_package = "github.com/6b70/peerbeam/proto/compiled/transferpb";
 
 
 message FileBlock {
