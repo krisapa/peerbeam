@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ksp237/peerbeam/cmd"
+	"github.com/6b70/peerbeam/cmd"
 	"golang.design/x/clipboard"
 	"log"
 )

@@ -12,7 +12,7 @@ PeerBeam is a CLI file transfer app powered by WebRTC. It establishes a direct, 
 To install PeerBeam, you'll need to have Go installed. You can download and install PeerBeam using the following commands:
 
 ```bash
-go install github.com/ksp237/peerbeam@latest
+go install github.com/6b70/peerbeam@latest
 ```
 
 This will install the `peerbeam` binary to your `$GOPATH/bin`.

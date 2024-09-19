@@ -1,4 +1,4 @@
-module github.com/ksp237/peerbeam
+module github.com/6b70/peerbeam
 
 go 1.22.5
 

@@ -2,8 +2,8 @@ package receiver
 
 import (
 	"fmt"
-	"github.com/ksp237/peerbeam/proto/compiled/controlpb"
-	"github.com/ksp237/peerbeam/utils"
+	"github.com/6b70/peerbeam/proto/compiled/controlpb"
+	"github.com/6b70/peerbeam/utils"
 	"google.golang.org/protobuf/proto"
 	"strings"
 )

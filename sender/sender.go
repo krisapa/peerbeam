@@ -2,9 +2,9 @@ package sender
 
 import (
 	"fmt"
+	"github.com/6b70/peerbeam/conn"
+	"github.com/6b70/peerbeam/utils"
 	"github.com/google/uuid"
-	"github.com/ksp237/peerbeam/conn"
-	"github.com/ksp237/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
 	"os"
 	"path/filepath"

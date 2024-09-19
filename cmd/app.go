@@ -3,9 +3,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/ksp237/peerbeam/conn"
-	"github.com/ksp237/peerbeam/receiver"
-	"github.com/ksp237/peerbeam/sender"
+	"github.com/6b70/peerbeam/conn"
+	"github.com/6b70/peerbeam/receiver"
+	"github.com/6b70/peerbeam/sender"
 	"github.com/urfave/cli/v2"
 	"os"
 	"path/filepath"
