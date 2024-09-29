@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/pion/webrtc/v4"
 	"golang.design/x/clipboard"
 	"io"
@@ -59,16 +58,29 @@ func DecodeSDP(in string) (*webrtc.SessionDescription, error) {
 	return &sdp, nil
 }
 
-func InputSDPPrompt() *webrtc.SessionDescription {
-	for {
-		fmt.Scanln()
-		clipBytes := clipboard.Read(clipboard.FmtText)
-		if remoteSDP, err := DecodeSDP(string(clipBytes)); err == nil {
-			fmt.Println("SDP successfully read.")
-			return remoteSDP
-		}
-		fmt.Println("Invalid SDP. Ensure it's copied to your clipboard and press Enter.")
+func ValidateSDP(input string) error {
+	buf, err := base64.URLEncoding.DecodeString(input)
+	if err != nil {
+		return err
 	}
+	r, err := gzip.NewReader(bytes.NewReader(buf))
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	sdpBytes, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	var sdp webrtc.SessionDescription
+	err = json.Unmarshal(sdpBytes, &sdp)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CopyGeneratedSDPPrompt(sdp string) {

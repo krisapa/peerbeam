@@ -73,9 +73,9 @@ func DecompressStream(dataReader io.Reader) *io.PipeReader {
 	return pr
 }
 
-var compressedExtensions = []string{".zip", ".tar", ".gz", ".rar", ".7z"}
+var archiveExtensions = []string{".zip", ".tar", ".gz", ".rar", ".7z"}
 
 func IsArchiveFile(filePath string) bool {
 	ext := strings.ToLower(filepath.Ext(filePath))
-	return slices.Contains(compressedExtensions, ext)
+	return slices.Contains(archiveExtensions, ext)
 }
