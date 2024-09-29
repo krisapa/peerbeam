@@ -3,22 +3,23 @@ package sender
 import (
 	"fmt"
 	"github.com/6b70/peerbeam/proto/compiled/controlpb"
+	"github.com/6b70/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
 	"google.golang.org/protobuf/proto"
 	"path"
 	"time"
 )
 
-func (s *Sender) proposeTransfer(ftList []fileTransfer) error {
+func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	fileMDList := &controlpb.FileMetadataList{
 		Files: make([]*controlpb.FileMetadata, 0, len(ftList)),
 	}
 	for _, ft := range ftList {
 		fileMDList.Files = append(fileMDList.Files, &controlpb.FileMetadata{
-			TransferId:  ft.transferUUID.String(),
-			FileName:    path.Base(ft.filePath),
-			FileSize:    ft.fileInfo.Size(),
-			IsDirectory: ft.fileInfo.IsDir(),
+			TransferId:  ft.TransferUUID.String(),
+			FileName:    path.Base(ft.FilePath),
+			FileSize:    ft.FileInfo.Size(),
+			IsDirectory: ft.FileInfo.IsDir(),
 		})
 	}
 
@@ -31,7 +32,6 @@ func (s *Sender) proposeTransfer(ftList []fileTransfer) error {
 		return err
 	}
 
-	fmt.Println("Waiting for receiver to accept the transfer...")
 	err = s.consentCheck()
 	if err != nil {
 		return err

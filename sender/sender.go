@@ -4,19 +4,11 @@ import (
 	"fmt"
 	"github.com/6b70/peerbeam/conn"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/google/uuid"
 	"github.com/pion/webrtc/v4"
-	"os"
-	"path/filepath"
 )
 
 type Sender struct {
 	*conn.Session
-}
-
-func StartSender(files []string) error {
-	sender := New()
-	return sender.Send(files)
 }
 
 func New() *Sender {
@@ -25,58 +17,58 @@ func New() *Sender {
 	}
 }
 
-type fileTransfer struct {
-	transferUUID uuid.UUID
-	filePath     string
-	fileInfo     os.FileInfo
-}
-
-func (s *Sender) Send(files []string) error {
-	defer s.CtxCancel()
-	ftList, err := parseFiles(files)
+func (s *Sender) SetupSenderConn() (string, error) {
+	err := s.SetupPeerConn()
 	if err != nil {
-		return err
+		return "", err
 	}
-
-	err = s.SetupPeerConn()
-	if err != nil {
-		return err
-	}
-
 	err = s.setupDataCh()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	offer, err := s.CreateOffer()
+	offer, err := s.createOffer()
+	if err != nil {
+		return "", err
+	}
+
+	return offer, nil
+}
+
+func (s *Sender) ProposeTransfer(ftList []utils.FileTransfer, answerStr string) error {
+	remoteSDP, err := utils.DecodeSDP(answerStr)
 	if err != nil {
 		return err
 	}
 
-	utils.CopyGeneratedSDPPrompt(offer)
-	fmt.Println("1. Offer copied to clipboard. Share it with the receiver.")
-	fmt.Println("2. Copy the receiver's answer and press Enter.")
-	remoteSDP := utils.InputSDPPrompt()
 	err = s.AddRemote(remoteSDP)
 	if err != nil {
 		return err
 	}
 
-	<-s.DataChOpen
-	err = s.proposeTransfer(ftList)
-	if err != nil {
-		return err
+	select {
+	case <-s.DataChOpen:
+		break
+	case <-s.Ctx.Done():
+		return fmt.Errorf("context cancelled")
 	}
 
-	err = s.sendFiles(ftList)
+	err = s.sendTransferInfo(ftList)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Files sent successfully")
 	return nil
 }
 
-func (s *Sender) CreateOffer() (string, error) {
+func (s *Sender) Send(ftList []utils.FileTransfer) error {
+	err := s.sendFiles(ftList)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Sender) createOffer() (string, error) {
 	initialSDPOffer, err := s.Conn.CreateOffer(nil)
 	if err != nil {
 		return "", err
@@ -94,24 +86,4 @@ func (s *Sender) CreateOffer() (string, error) {
 	}
 
 	return encodedSDP, nil
-}
-
-func parseFiles(files []string) ([]fileTransfer, error) {
-	ftList := make([]fileTransfer, 0, len(files))
-	for _, relFP := range files {
-		fp, err := filepath.Abs(relFP)
-		if err != nil {
-			return nil, fmt.Errorf("error with file '%s': %v", relFP, err)
-		}
-		fi, err := os.Stat(fp)
-		if err != nil {
-			return nil, fmt.Errorf("error with file '%s': %v", fp, err)
-		}
-		ftList = append(ftList, fileTransfer{
-			transferUUID: uuid.New(),
-			filePath:     fp,
-			fileInfo:     fi,
-		})
-	}
-	return ftList, nil
 }

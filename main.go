@@ -11,6 +11,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	err = cmd.App()
 	if err != nil {
 		log.Fatal(err)
