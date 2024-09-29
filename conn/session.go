@@ -13,17 +13,16 @@ type Session struct {
 	Ctx       context.Context
 	CtxCancel context.CancelFunc
 
-	MsgCh    chan *webrtc.DataChannelMessage
-	StateMap map[webrtc.ICEConnectionState]chan struct{}
+	MsgCh chan *webrtc.DataChannelMessage
 }
 
 func New() *Session {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Session{
-		Ctx:        ctx,
-		CtxCancel:  cancel,
-		StateMap:   make(map[webrtc.ICEConnectionState]chan struct{}),
+		Ctx:       ctx,
+		CtxCancel: cancel,
+		//StateMap:   make(map[webrtc.ICEConnectionState]chan struct{}),
 		MsgCh:      make(chan *webrtc.DataChannelMessage, 100),
-		DataChOpen: make(chan struct{}),
+		DataChOpen: make(chan struct{}, 10),
 	}
 }
