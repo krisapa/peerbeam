@@ -30,6 +30,7 @@ func App() error {
 			},
 			{
 				Name:      "receive",
+				Aliases:   []string{"recv"},
 				Usage:     "Receive files",
 				UsageText: "peerbeam receive [destination]",
 				Action: func(c *cli.Context) error {
