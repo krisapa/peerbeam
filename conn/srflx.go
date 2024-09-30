@@ -10,7 +10,7 @@ const gatherTimeout = 30 * time.Second
 
 func FetchSRFLX() ([]*webrtc.ICECandidate, error) {
 	conn, err := webrtc.NewPeerConnection(webrtc.Configuration{
-		ICEServers: iceServers,
+		ICEServers: []webrtc.ICEServer{iceServers[0]},
 	})
 	if err != nil {
 		return nil, err

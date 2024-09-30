@@ -17,7 +17,7 @@ func (c *Session) AddRemote(remoteSDP *webrtc.SessionDescription) error {
 
 func (c *Session) SetupPeerConn() error {
 	conn, err := webrtc.NewPeerConnection(webrtc.Configuration{
-		ICEServers: iceServers,
+		ICEServers: []webrtc.ICEServer{iceServers[0]},
 	})
 	if err != nil {
 		return err
