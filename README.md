@@ -1,68 +1,44 @@
 # PeerBeam
 
-PeerBeam is a CLI file transfer app powered by WebRTC. It establishes a direct, peer-to-peer connection without relying on intermediary data relays. 
+`PeerBeam` is a CLI tool that allows two computers to quickly and securely transfer files. 
 
-- **Direct P2P File Transfer**: WebRTC NAT traversal can connect two clients that are both behind NATs and firewalls without any port forwarding
-- **STUN Server**: Uses Google's public STUN server to retrieve public IP address, port, and NAT type information
+- enables **direct file transfer** between two computers
+- uses **WebRTC** for secure, p2p communication
+- **cross-platform**: works on Windows, Linux, macOS, your toaster
+- **no port-forwarding** or network config needed
+- supports **ipv6** and **ipv4**
 
-[xkcd: File Transfer](https://xkcd.com/949/)
+> **Note:** Some side channel is required to exchange the initial connection info. (RDP, SSH, text, email, etc.)
 
 ## Installation
 
-To install PeerBeam, you'll need to have Go installed. You can download and install PeerBeam using the following commands:
-
-```bash
+[Install Go](https://golang.org/dl/) then run:
+```
 go install github.com/6b70/peerbeam@latest
 ```
-
 This will install the `peerbeam` binary to your `$GOPATH/bin`.
 
 ## Usage
-
-PeerBeam provides simple commands for sending and receiving files:
-
-### Send Files
-
-To send files:
-
+To send a file run:
 ```bash
 peerbeam send <file1> <file2> ...
 ```
 
-This will initiate the file transfer process. The receiving peer will need to execute the `receive` command to accept the files.
-
-### Receive Files
-
-To receive files:
-
+To receive files run:
 ```bash
 peerbeam receive
 ```
 
-This will listen for incoming file transfers and prompt for acceptance before the transfer begins.
-
-### Find Your Public IP
-
-To fetch srflx candidate (NAT IP:port mappings)
-
+You can also query a STUN server for ICE candidates by running:
 ```bash
 peerbeam stun
 ```
 
-## Development
-
-To build PeerBeam from source:
-
-```bash
-git clone https://github.com/yourusername/peerbeam.git
-cd peerbeam
-go build
-```
+## References
+* [pion/webrtc](https://github.com/pion/webrtc)
+* [pion/sctp](https://github.com/pion/sctp)
+* [schollz/croc](https://github.com/schollz/croc)
 
 ## License
 
 PeerBeam is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-## References
-* [pion/webrtc](https://github.com/pion/webrtc)
-* [pion/sctp](https://github.com/pion/sctp)

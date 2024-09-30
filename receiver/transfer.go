@@ -6,6 +6,7 @@ import (
 	"github.com/6b70/peerbeam/proto/compiled/transferpb"
 	"github.com/6b70/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
+	"github.com/schollz/progressbar/v3"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"os"
@@ -35,7 +36,6 @@ func (r *Receiver) receiveFiles(fileMDList *controlpb.FileMetadataList, destPath
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Received file '%s'\n", fmd.FileName)
 
 		// Send the confirmation response
 		pbBytes, err := proto.Marshal(&transferpb.TransferComplete{
@@ -63,6 +63,13 @@ func (r *Receiver) receiveBlock() (*webrtc.DataChannelMessage, error) {
 }
 
 func (r *Receiver) receiveFile(ts *transferpb.TransferStart, fmd *controlpb.FileMetadata, destPath string) error {
+	peerInfoStr, err := r.PeerInfoStr()
+	if err != nil {
+		return err
+	}
+	bar := utils.NewProgressBar(fmd.FileSize, peerInfoStr, false)
+	defer bar.Close()
+
 	filePath := filepath.Join(destPath, fmd.FileName)
 	destFile, err := os.Create(filePath)
 	if err != nil {
@@ -70,7 +77,7 @@ func (r *Receiver) receiveFile(ts *transferpb.TransferStart, fmd *controlpb.File
 	}
 	defer destFile.Close()
 
-	decompressedReader, err := r.receiveAndDecompress(ts)
+	decompressedReader, err := r.receiveAndDecompress(ts, bar)
 	if err != nil {
 		return err
 	}
@@ -80,7 +87,7 @@ func (r *Receiver) receiveFile(ts *transferpb.TransferStart, fmd *controlpb.File
 	return nil
 }
 
-func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart) (io.Reader, error) {
+func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart, bar *progressbar.ProgressBar) (io.Reader, error) {
 	pr, pw := io.Pipe()
 	go func() {
 		defer pw.Close()
@@ -100,6 +107,10 @@ func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart) (io.Reader
 				pw.CloseWithError(fmt.Errorf("unexpected transfer ID received: %s", fileBlock.TransferId))
 				return
 			}
+			err = bar.Add(len(fileBlock.Data))
+			if err != nil {
+				bar.Finish()
+			}
 			isLastBlock = fileBlock.IsLastBlock
 			if _, err = pw.Write(fileBlock.Data); err != nil {
 				pw.CloseWithError(err)
@@ -107,5 +118,8 @@ func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart) (io.Reader
 			}
 		}
 	}()
+	if !ts.IsCompressed {
+		return pr, nil
+	}
 	return utils.DecompressStream(pr), nil
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/6b70/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
 	"google.golang.org/protobuf/proto"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -17,7 +17,7 @@ func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	for _, ft := range ftList {
 		fileMDList.Files = append(fileMDList.Files, &controlpb.FileMetadata{
 			TransferId:  ft.TransferUUID.String(),
-			FileName:    path.Base(ft.FilePath),
+			FileName:    filepath.Base(ft.FilePath),
 			FileSize:    ft.FileInfo.Size(),
 			IsDirectory: ft.FileInfo.IsDir(),
 		})

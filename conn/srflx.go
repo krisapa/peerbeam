@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const gatherTimeout = 20 * time.Second
+const gatherTimeout = 30 * time.Second
 
 func FetchSRFLX() ([]*webrtc.ICECandidate, error) {
 	conn, err := webrtc.NewPeerConnection(webrtc.Configuration{
