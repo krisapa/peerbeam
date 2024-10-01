@@ -1,7 +1,6 @@
 package conn
 
 import (
-	"context"
 	"fmt"
 	"github.com/pion/webrtc/v4"
 	"log/slog"
@@ -23,9 +22,6 @@ func (c *Session) SetupPeerConn() error {
 		return err
 	}
 	c.Conn = conn
-	ctx, cancel := context.WithCancel(context.Background())
-	c.Ctx = ctx
-	c.CtxCancel = cancel
 	c.monitorState()
 	go c.connClose()
 
