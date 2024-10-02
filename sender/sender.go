@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/6b70/peerbeam/conn"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/pion/webrtc/v4"
 )
 
 type Sender struct {
@@ -22,7 +21,7 @@ func (s *Sender) SetupSenderConn() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = s.setupDataCh()
+	err = s.setupChs()
 	if err != nil {
 		return "", err
 	}
@@ -73,12 +72,17 @@ func (s *Sender) createOffer() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	done := webrtc.GatheringCompletePromise(s.Conn)
+	//done := webrtc.GatheringCompletePromise(s.Conn)
 	err = s.Conn.SetLocalDescription(initialSDPOffer)
 	if err != nil {
 		return "", err
 	}
-	<-done
+	//<-done
+
+	s.CandidateCond.L.Lock()
+	s.CandidateCond.Wait()
+	s.CandidateCond.L.Unlock()
+
 	sdpOffer := s.Conn.LocalDescription()
 	encodedSDP, err := utils.EncodeSDP(sdpOffer)
 	if err != nil {

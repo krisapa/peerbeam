@@ -10,6 +10,8 @@ func (r *Receiver) addChHandler() {
 		switch ch.Label() {
 		case "data":
 			r.DataChHandler(ch)
+		case "candidate":
+			r.CandidateChHandler(ch)
 		default:
 			slog.Error("Unknown channel label:", ch.Label())
 			return

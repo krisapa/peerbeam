@@ -4,7 +4,6 @@ import (
 	"github.com/6b70/peerbeam/conn"
 	"github.com/6b70/peerbeam/proto/compiled/controlpb"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/pion/webrtc/v4"
 )
 
 type Receiver struct {
@@ -31,13 +30,12 @@ func (r *Receiver) CreateAnswer(offer string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	candidatePromise := webrtc.GatheringCompletePromise(r.Conn)
 	err = r.AddRemote(offerSDP)
 	if err != nil {
 		return "", err
 	}
 
-	answer, err := r.createSDP(candidatePromise)
+	answer, err := r.createSDP()
 	if err != nil {
 		return "", err
 	}
@@ -51,11 +49,11 @@ func (r *Receiver) Receive(fileMDList *controlpb.FileMetadataList, destPath stri
 		return err
 	}
 	// Doesn't always flush but this is handled in the sender
-	r.DataCh.Close()
+	_ = r.DataCh.Close()
 	return nil
 }
 
-func (r *Receiver) createSDP(candidatePromise <-chan struct{}) (string, error) {
+func (r *Receiver) createSDP() (string, error) {
 	initAnswer, err := r.Conn.CreateAnswer(nil)
 	if err != nil {
 		return "", err
@@ -64,7 +62,11 @@ func (r *Receiver) createSDP(candidatePromise <-chan struct{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	<-candidatePromise
+
+	r.CandidateCond.L.Lock()
+	r.CandidateCond.Wait()
+	r.CandidateCond.L.Unlock()
+
 	answer := r.Conn.LocalDescription()
 
 	encodedSDP, err := utils.EncodeSDP(answer)

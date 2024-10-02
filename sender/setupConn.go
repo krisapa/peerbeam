@@ -1,21 +1,17 @@
 package sender
 
-func (s *Sender) setupDataCh() error {
+func (s *Sender) setupChs() error {
 	ch, err := s.Conn.CreateDataChannel("data", nil)
 	if err != nil {
 		return err
 	}
 	s.DataChHandler(ch)
-	//s.DataCh = channel
-	//s.DataCh.OnOpen(func() {
-	//	s.DataChOpen <- struct{}{}
-	//})
-	//s.DataCh.OnClose(func() {
-	//	s.CtxCancel()
-	//})
-	//
-	//s.DataCh.OnMessage(func(msg webrtc.DataChannelMessage) {
-	//	s.MsgCh <- &msg
-	//})
+
+	ch, err = s.Conn.CreateDataChannel("candidate", nil)
+	if err != nil {
+		return err
+	}
+	s.CandidateChHandler(ch)
+
 	return nil
 }

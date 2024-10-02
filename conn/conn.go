@@ -24,23 +24,9 @@ func (c *Session) SetupPeerConn() error {
 	c.Conn = conn
 	c.monitorState()
 	go c.connClose()
+	c.sendCandidatesHandler()
 
 	return nil
-}
-
-func (c *Session) DataChHandler(ch *webrtc.DataChannel) {
-	c.DataCh = ch
-	ch.OnOpen(func() {
-		c.DataChOpen <- struct{}{}
-	})
-	c.DataCh.OnClose(func() {
-		c.CtxCancel()
-	})
-
-	c.DataCh.OnMessage(func(msg webrtc.DataChannelMessage) {
-		c.MsgCh <- &msg
-	})
-
 }
 
 func (c *Session) connClose() {
@@ -58,16 +44,6 @@ func (c *Session) connClose() {
 			slog.Error("Error closing peer connection:", err)
 		}
 	}
-}
-
-func (c *Session) monitorState() {
-	c.Conn.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
-		switch connectionState {
-		case webrtc.ICEConnectionStateFailed:
-			c.CtxCancel()
-		default:
-		}
-	})
 }
 
 func (c *Session) PeerInfoStr() (string, error) {
