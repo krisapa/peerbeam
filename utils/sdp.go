@@ -32,11 +32,11 @@ func EncodeSDP(sdp *webrtc.SessionDescription) (string, error) {
 		return "", err
 	}
 
-	return base64.URLEncoding.EncodeToString(buf.Bytes()), nil
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
 }
 
 func DecodeSDP(in string) (*webrtc.SessionDescription, error) {
-	buf, err := base64.URLEncoding.DecodeString(in)
+	buf, err := base64.StdEncoding.DecodeString(in)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func DecodeSDP(in string) (*webrtc.SessionDescription, error) {
 }
 
 func ValidateSDP(input string) error {
-	buf, err := base64.URLEncoding.DecodeString(input)
+	buf, err := base64.StdEncoding.DecodeString(input)
 	if err != nil {
 		return err
 	}
