@@ -1,14 +1,14 @@
 # PeerBeam
 
-`PeerBeam` is a CLI tool that allows two computers to quickly and securely transfer files. 
+https://github.com/user-attachments/assets/9579b274-1067-42c8-b8c9-816e3168f6b4
 
-- enables **direct file transfer** between two computers
-- uses **WebRTC** for secure, p2p communication
-- **cross-platform**: works on Windows, Linux, macOS, your toaster
+`PeerBeam` is a tool for fast and secure file transfer between computers.
+
+- **direct file transfer** between two computers
+- **WebRTC** for secure, p2p communication
+- **cross-platform**: works on Windows, Linux, macOS
 - **no port-forwarding** or network config needed
 - supports **ipv6** and **ipv4**
-
-> **Note:** Some side channel is required to exchange the initial connection info. (RDP, SSH, text, email, etc.)
 
 ## Installation
 
@@ -29,7 +29,7 @@ To receive files run:
 peerbeam receive
 ```
 
-You can also query a STUN server for ICE candidates by running:
+You can also query a STUN server:
 ```bash
 peerbeam stun
 ```
@@ -39,6 +39,3 @@ peerbeam stun
 * [pion/sctp](https://github.com/pion/sctp)
 * [schollz/croc](https://github.com/schollz/croc)
 
-## License
-
-PeerBeam is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
