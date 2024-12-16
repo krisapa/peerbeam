@@ -32,3 +32,19 @@ func ParseFiles(files []string) ([]FileTransfer, error) {
 	}
 	return ftList, nil
 }
+
+func ValidateDestPath(destPath string) (string, error) {
+	var err error
+	destPath, err = filepath.Abs(destPath)
+	if err != nil {
+		return "", err
+	}
+	destInfo, err := os.Stat(destPath)
+	if err != nil {
+		return "", err
+	}
+	if !destInfo.IsDir() {
+		return "", fmt.Errorf("destination path must be a directory")
+	}
+	return destPath, nil
+}

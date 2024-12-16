@@ -18,11 +18,11 @@ const (
 	maxBufferedAmount          uint64 = 1024 * 1024 // 1 MB
 )
 
-func (s *Sender) sendFiles(ftList []utils.FileTransfer) error {
-	s.DataCh.SetBufferedAmountLowThreshold(bufferedAmountLowThreshold)
+func (s *Sender) SendFiles(ftList []utils.FileTransfer) error {
+	s.Session.DataCh.SetBufferedAmountLowThreshold(bufferedAmountLowThreshold)
 
 	sendMoreCh := make(chan struct{}, 1)
-	s.DataCh.OnBufferedAmountLow(func() {
+	s.Session.DataCh.OnBufferedAmountLow(func() {
 		select {
 		case sendMoreCh <- struct{}{}:
 		default:
@@ -64,11 +64,11 @@ func (s *Sender) sendTransferStart(ft utils.FileTransfer, isCompressed bool) err
 	if err != nil {
 		return err
 	}
-	return s.DataCh.Send(transferStartBytes)
+	return s.Session.DataCh.Send(transferStartBytes)
 }
 
 func (s *Sender) sendFileBlocks(ft utils.FileTransfer, sendMoreCh <-chan struct{}, isCompressed bool) error {
-	peerInfoStr, err := s.PeerInfoStr()
+	peerInfoStr, err := s.Session.PeerInfoStr()
 	if err != nil {
 		return err
 	}
@@ -120,25 +120,25 @@ func (s *Sender) sendFileBlock(ft utils.FileTransfer, data []byte, isLastBlock b
 		return err
 	}
 
-	if s.DataCh.BufferedAmount() >= maxBufferedAmount {
+	if s.Session.DataCh.BufferedAmount() >= maxBufferedAmount {
 		select {
 		case <-sendMoreCh:
-		case <-s.Ctx.Done():
+		case <-s.Session.Ctx.Done():
 			return fmt.Errorf("context cancelled while waiting to send data")
 		}
 	}
 
-	return s.DataCh.Send(pbBytes)
+	return s.Session.DataCh.Send(pbBytes)
 }
 
 func (s *Sender) transferConfirmation(ft utils.FileTransfer) error {
 	var fileResp *webrtc.DataChannelMessage
 	select {
-	case <-s.Ctx.Done():
+	case <-s.Session.Ctx.Done():
 		return fmt.Errorf("context cancelled while waiting for confirmation response")
 	case <-time.After(1 * time.Second):
 		return fmt.Errorf("timeout while waiting for confirmation response")
-	case fileResp = <-s.MsgCh:
+	case fileResp = <-s.Session.MsgCh:
 	}
 
 	var fileRespPB transferpb.TransferComplete

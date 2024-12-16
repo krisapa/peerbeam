@@ -9,8 +9,6 @@ message FileMetadata {
   string file_name = 2;
   int64 file_size = 3;
   bool is_directory = 4;
-//  string file_type = 4; // MIME type: image/png, application/pdf
-//  int32 file_count = 4;
 }
 
 message FileMetadataList {

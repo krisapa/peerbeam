@@ -6,14 +6,6 @@ import (
 	"log/slog"
 )
 
-func (c *Session) AddRemote(remoteSDP *webrtc.SessionDescription) error {
-	err := c.Conn.SetRemoteDescription(*remoteSDP)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *Session) SetupPeerConn() error {
 	conn, err := webrtc.NewPeerConnection(webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{iceServers[0]},

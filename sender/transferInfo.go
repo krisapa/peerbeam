@@ -10,6 +10,37 @@ import (
 	"time"
 )
 
+func (s *Sender) ProposeTransfer(ftList []utils.FileTransfer, answerStr string) error {
+	remoteSDP, err := utils.DecodeSDP(answerStr)
+	if err != nil {
+		return err
+	}
+
+	err = s.Session.Conn.SetRemoteDescription(*remoteSDP)
+	if err != nil {
+		return err
+	}
+
+	select {
+	case <-s.Session.DataChOpen:
+		break
+	case <-s.Session.Ctx.Done():
+		return fmt.Errorf("context cancelled")
+	}
+
+	err = s.sendTransferInfo(ftList)
+	if err != nil {
+		return err
+	}
+
+	err = s.consentCheck()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	fileMDList := &controlpb.FileMetadataList{
 		Files: make([]*controlpb.FileMetadata, 0, len(ftList)),
@@ -27,12 +58,7 @@ func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	if err != nil {
 		return err
 	}
-	err = s.DataCh.Send(pbBytes)
-	if err != nil {
-		return err
-	}
-
-	err = s.consentCheck()
+	err = s.Session.DataCh.Send(pbBytes)
 	if err != nil {
 		return err
 	}
@@ -45,9 +71,9 @@ func (s *Sender) consentCheck() error {
 	select {
 	case <-time.After(300 * time.Second):
 		return fmt.Errorf("timed out waiting for consent")
-	case <-s.Ctx.Done():
+	case <-s.Session.Ctx.Done():
 		return fmt.Errorf("context cancelled")
-	case msg = <-s.MsgCh:
+	case msg = <-s.Session.MsgCh:
 		break
 	}
 	consent := &controlpb.TransferConsent{}
