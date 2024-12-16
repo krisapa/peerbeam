@@ -13,7 +13,12 @@ import (
 	"path/filepath"
 )
 
-func (r *Receiver) receiveFiles(fileMDList *controlpb.FileMetadataList, destPath string) error {
+func (r *Receiver) ReceiveFiles(fileMDList *controlpb.FileMetadataList, destPath string) error {
+	defer func() {
+		// Doesn't always flush but this is handled in the sender
+		_ = r.Session.DataCh.Close()
+	}()
+
 	transferIDMap := make(map[string]*controlpb.FileMetadata)
 	for _, fileMD := range fileMDList.Files {
 		transferIDMap[fileMD.TransferId] = fileMD
@@ -45,7 +50,7 @@ func (r *Receiver) receiveFiles(fileMDList *controlpb.FileMetadataList, destPath
 		if err != nil {
 			return err
 		}
-		if err = r.DataCh.Send(pbBytes); err != nil {
+		if err = r.Session.DataCh.Send(pbBytes); err != nil {
 			return err
 		}
 	}
@@ -55,15 +60,15 @@ func (r *Receiver) receiveFiles(fileMDList *controlpb.FileMetadataList, destPath
 
 func (r *Receiver) receiveBlock() (*webrtc.DataChannelMessage, error) {
 	select {
-	case dcMSG := <-r.MsgCh:
+	case dcMSG := <-r.Session.MsgCh:
 		return dcMSG, nil
-	case <-r.Ctx.Done():
+	case <-r.Session.Ctx.Done():
 		return nil, fmt.Errorf("context cancelled while receiving file")
 	}
 }
 
 func (r *Receiver) receiveFile(ts *transferpb.TransferStart, fmd *controlpb.FileMetadata, destPath string) error {
-	peerInfoStr, err := r.PeerInfoStr()
+	peerInfoStr, err := r.Session.PeerInfoStr()
 	if err != nil {
 		return err
 	}

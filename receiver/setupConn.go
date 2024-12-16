@@ -1,20 +1,63 @@
 package receiver
 
 import (
+	"github.com/6b70/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
 	"log/slog"
 )
 
-func (r *Receiver) addChHandler() {
-	r.Conn.OnDataChannel(func(ch *webrtc.DataChannel) {
+func (r *Receiver) SetupReceiverConn() error {
+	err := r.Session.SetupPeerConn()
+	if err != nil {
+		return err
+	}
+	r.registerHandlers()
+	return nil
+}
+
+func (r *Receiver) registerHandlers() {
+	r.Session.Conn.OnDataChannel(func(ch *webrtc.DataChannel) {
 		switch ch.Label() {
 		case "data":
-			r.DataChHandler(ch)
+			r.Session.DataChHandler(ch)
 		case "candidate":
-			r.CandidateChHandler(ch)
+			r.Session.CandidateChHandler(ch)
 		default:
 			slog.Error("Unknown channel label:", ch.Label())
 			return
 		}
 	})
+}
+
+func (r *Receiver) CreateAnswer(offer string) (string, error) {
+	offerSDP, err := utils.DecodeSDP(offer)
+	if err != nil {
+		return "", err
+	}
+	err = r.Session.Conn.SetRemoteDescription(*offerSDP)
+	if err != nil {
+		return "", err
+	}
+
+	initAnswer, err := r.Session.Conn.CreateAnswer(nil)
+	if err != nil {
+		return "", err
+	}
+	err = r.Session.Conn.SetLocalDescription(initAnswer)
+	if err != nil {
+		return "", err
+	}
+
+	r.Session.CandidateCond.L.Lock()
+	r.Session.CandidateCond.Wait()
+	r.Session.CandidateCond.L.Unlock()
+
+	answer := r.Session.Conn.LocalDescription()
+
+	encodedSDP, err := utils.EncodeSDP(answer)
+	if err != nil {
+		return "", err
+	}
+
+	return encodedSDP, nil
 }

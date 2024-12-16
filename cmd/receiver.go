@@ -1,31 +1,21 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/6b70/peerbeam/proto/compiled/controlpb"
 	"github.com/6b70/peerbeam/receiver"
 	"github.com/6b70/peerbeam/utils"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
-	"os"
-	"path/filepath"
 )
 
 func startReceiver(destPath string) error {
-	var err error
-	destPath, err = filepath.Abs(destPath)
+	destPath, err := utils.ValidateDestPath(destPath)
 	if err != nil {
 		return err
 	}
-	destInfo, err := os.Stat(destPath)
-	if err != nil {
-		return err
-	}
-	if !destInfo.IsDir() {
-		return fmt.Errorf("destination path must be a directory")
-	}
+
 	r := receiver.New()
-	defer r.CtxCancel()
+	defer r.Session.CtxCancel()
 
 	err = r.SetupReceiverConn()
 	if err != nil {
@@ -60,7 +50,7 @@ func startReceiver(destPath string) error {
 		Type(spinner.Dots).
 		Title("Answer copied. Send to sender.").
 		Action(func() {
-			fileMDList, actionErr = r.ReceiveFileProposal()
+			fileMDList, actionErr = r.ReceiveTransferInfo()
 		}).
 		Run()
 	if err != nil {
@@ -76,17 +66,15 @@ func startReceiver(destPath string) error {
 		return err
 	}
 
-	err = r.SendProposalResponse(isTransferAccepted)
+	err = r.SendTransferConsent(isTransferAccepted)
 	if err != nil {
 		return err
 	}
 	if !isTransferAccepted {
-		// Flushes data channel before exiting
-		r.DataCh.GracefulClose()
 		return nil
 	}
 
-	return r.Receive(fileMDList, destPath)
+	return r.ReceiveFiles(fileMDList, destPath)
 }
 
 func recvExchangeSDP() (string, error) {

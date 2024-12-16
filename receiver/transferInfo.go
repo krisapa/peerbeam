@@ -6,31 +6,37 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func (r *Receiver) ReceiveFileProposal() (*controlpb.FileMetadataList, error) {
+func (r *Receiver) ReceiveTransferInfo() (*controlpb.FileMetadataList, error) {
 	select {
-	case <-r.DataChOpen:
+	case <-r.Session.DataChOpen:
 		break
-	case <-r.Ctx.Done():
+	case <-r.Session.Ctx.Done():
 		return nil, fmt.Errorf("context cancelled")
 	}
 
-	dcMSG := <-r.MsgCh
+	dcMSG := <-r.Session.MsgCh
 	var fileMDList controlpb.FileMetadataList
 	if err := proto.Unmarshal(dcMSG.Data, &fileMDList); err != nil {
 		return nil, err
 	}
+
 	return &fileMDList, nil
 }
 
-func (r *Receiver) SendProposalResponse(isTransferAccepted bool) error {
+func (r *Receiver) SendTransferConsent(isTransferAccepted bool) error {
 	consentBytes, err := proto.Marshal(&controlpb.TransferConsent{
 		Consent: isTransferAccepted,
 	})
 	if err != nil {
 		return err
 	}
-	if err = r.DataCh.Send(consentBytes); err != nil {
+	if err = r.Session.DataCh.Send(consentBytes); err != nil {
 		return err
 	}
+	if !isTransferAccepted {
+		// Flushes data channel before exiting
+		r.Session.DataCh.GracefulClose()
+	}
+
 	return nil
 }

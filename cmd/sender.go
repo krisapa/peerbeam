@@ -12,7 +12,7 @@ import (
 
 func startSender(files []string) error {
 	s := sender.New()
-	defer s.CtxCancel()
+	defer s.Session.CtxCancel()
 
 	offerCh := make(chan string)
 	go func() {
@@ -32,7 +32,7 @@ func startSender(files []string) error {
 	var offer string
 	err = spinner.New().
 		Type(spinner.Dots).
-		Title("Generating offer").
+		Title("Creating offer").
 		Action(func() {
 			offer = <-offerCh
 		}).
@@ -66,7 +66,7 @@ func startSender(files []string) error {
 		return fmt.Errorf("transfer rejected")
 	}
 
-	return s.Send(ftList)
+	return s.SendFiles(ftList)
 }
 
 // exchangeSDP handles the SDP offer and answer exchange process
