@@ -3,7 +3,7 @@ package receiver
 import (
 	"github.com/6b70/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
-	"log/slog"
+	log "github.com/sirupsen/logrus"
 )
 
 func (r *Receiver) SetupReceiverConn() error {
@@ -23,7 +23,7 @@ func (r *Receiver) registerHandlers() {
 		case "candidate":
 			r.Session.CandidateChHandler(ch)
 		default:
-			slog.Error("Unknown channel label:", ch.Label())
+			log.Errorln("Unknown channel label:", ch.Label())
 			return
 		}
 	})

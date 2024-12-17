@@ -6,7 +6,7 @@ import (
 	"github.com/6b70/peerbeam/utils"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
-	"log/slog"
+	log "github.com/sirupsen/logrus"
 	"sync/atomic"
 )
 
@@ -18,7 +18,7 @@ func startSender(files []string) error {
 	go func() {
 		offer, err := s.SetupSenderConn()
 		if err != nil {
-			slog.Error(err.Error())
+			log.Errorln(err)
 			offerCh <- ""
 		}
 		offerCh <- offer
