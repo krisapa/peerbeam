@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/6b70/peerbeam/proto/compiled/controlpb"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/pion/webrtc/v4"
 	"google.golang.org/protobuf/proto"
 	"path/filepath"
 	"time"
@@ -62,22 +61,19 @@ func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Sent transfer info")
 
 	return nil
 }
 
 func (s *Sender) consentCheck() error {
-	var msg *webrtc.DataChannelMessage
-	select {
-	case <-time.After(300 * time.Second):
-		return fmt.Errorf("timed out waiting for consent")
-	case <-s.Session.Ctx.Done():
-		return fmt.Errorf("context cancelled")
-	case msg = <-s.Session.MsgCh:
-		break
+	msg, err := s.Session.ReceiveMessage(300 * time.Second)
+	if err != nil {
+		return err
 	}
+
 	consent := &controlpb.TransferConsent{}
-	err := proto.Unmarshal(msg.Data, consent)
+	err = proto.Unmarshal(msg, consent)
 	if err != nil {
 		return err
 	}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/6b70/peerbeam/proto/compiled/controlpb"
 	"github.com/6b70/peerbeam/proto/compiled/transferpb"
+	"github.com/6b70/peerbeam/sender"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/pion/webrtc/v4"
 	"github.com/schollz/progressbar/v3"
 	"google.golang.org/protobuf/proto"
 	"io"
@@ -24,13 +24,13 @@ func (r *Receiver) ReceiveFiles(fileMDList *controlpb.FileMetadataList, destPath
 		transferIDMap[fileMD.TransferId] = fileMD
 	}
 
-	for _ = range fileMDList.Files {
-		transferStartMsg, err := r.receiveBlock()
+	for range fileMDList.Files {
+		msg, err := r.Session.ReceiveMessage(DefaultTimeout)
 		if err != nil {
-			return err
+			return fmt.Errorf("receiving transfer start message: %w", err)
 		}
 		var transferStart transferpb.TransferStart
-		if err = proto.Unmarshal(transferStartMsg.Data, &transferStart); err != nil {
+		if err = proto.Unmarshal(msg, &transferStart); err != nil {
 			return err
 		}
 		fmd, ok := transferIDMap[transferStart.TransferId]
@@ -56,15 +56,6 @@ func (r *Receiver) ReceiveFiles(fileMDList *controlpb.FileMetadataList, destPath
 	}
 
 	return nil
-}
-
-func (r *Receiver) receiveBlock() (*webrtc.DataChannelMessage, error) {
-	select {
-	case dcMSG := <-r.Session.MsgCh:
-		return dcMSG, nil
-	case <-r.Session.Ctx.Done():
-		return nil, fmt.Errorf("context cancelled while receiving file")
-	}
 }
 
 func (r *Receiver) receiveFile(ts *transferpb.TransferStart, fmd *controlpb.FileMetadata, destPath string) error {
@@ -98,13 +89,13 @@ func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart, bar *progr
 		defer pw.Close()
 		isLastBlock := false
 		for !isLastBlock {
-			msg, err := r.receiveBlock()
+			msg, err := r.Session.ReceiveMessage(DefaultTimeout)
 			if err != nil {
 				pw.CloseWithError(err)
 				return
 			}
 			var fileBlock transferpb.FileBlock
-			if err = proto.Unmarshal(msg.Data, &fileBlock); err != nil {
+			if err = proto.Unmarshal(msg, &fileBlock); err != nil {
 				pw.CloseWithError(err)
 				return
 			}
@@ -126,5 +117,5 @@ func (r *Receiver) receiveAndDecompress(ts *transferpb.TransferStart, bar *progr
 	if !ts.IsCompressed {
 		return pr, nil
 	}
-	return utils.DecompressStream(pr), nil
+	return utils.DecompressStream(pr, sender.BlockSize), nil
 }

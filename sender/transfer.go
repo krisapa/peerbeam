@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/6b70/peerbeam/proto/compiled/transferpb"
 	"github.com/6b70/peerbeam/utils"
-	"github.com/pion/webrtc/v4"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"os"
@@ -13,9 +12,10 @@ import (
 )
 
 const (
-	blockSize                  int    = 32 * 1024
-	bufferedAmountLowThreshold uint64 = 512 * 1024  // 512 KB
-	maxBufferedAmount          uint64 = 1024 * 1024 // 1 MB
+	// BlockSize max size for a single packet is 65535 for pion/sctp
+	BlockSize                         = 65000
+	maxBufferedAmount          uint64 = 1024 * 1024 * 10 // 10 MB
+	bufferedAmountLowThreshold        = maxBufferedAmount - BlockSize
 )
 
 func (s *Sender) SendFiles(ftList []utils.FileTransfer) error {
@@ -30,28 +30,19 @@ func (s *Sender) SendFiles(ftList []utils.FileTransfer) error {
 	})
 
 	for i, ft := range ftList {
-		err := s.sendFile(ft, sendMoreCh)
-		if err != nil {
+		isCompressed := !utils.IsArchiveFile(ft.FilePath)
+		if err := s.sendTransferStart(ft, isCompressed); err != nil {
 			return err
 		}
-		if err = s.transferConfirmation(ft); err != nil {
+		if err := s.sendFileBlocks(ft, isCompressed, sendMoreCh); err != nil {
+			return err
+		}
+		if err := s.transferConfirmation(ft); err != nil {
 			if i == len(ftList)-1 {
 				return nil
 			}
 			return err
 		}
-	}
-	return nil
-}
-
-func (s *Sender) sendFile(ft utils.FileTransfer, sendMoreCh <-chan struct{}) error {
-	isCompressed := !utils.IsArchiveFile(ft.FilePath)
-
-	if err := s.sendTransferStart(ft, isCompressed); err != nil {
-		return err
-	}
-	if err := s.sendFileBlocks(ft, sendMoreCh, isCompressed); err != nil {
-		return err
 	}
 	return nil
 }
@@ -67,7 +58,7 @@ func (s *Sender) sendTransferStart(ft utils.FileTransfer, isCompressed bool) err
 	return s.Session.DataCh.Send(transferStartBytes)
 }
 
-func (s *Sender) sendFileBlocks(ft utils.FileTransfer, sendMoreCh <-chan struct{}, isCompressed bool) error {
+func (s *Sender) sendFileBlocks(ft utils.FileTransfer, isCompressed bool, sendMoreCh <-chan struct{}) error {
 	peerInfoStr, err := s.Session.PeerInfoStr()
 	if err != nil {
 		return err
@@ -83,21 +74,20 @@ func (s *Sender) sendFileBlocks(ft utils.FileTransfer, sendMoreCh <-chan struct{
 
 	var reader io.Reader
 	if isCompressed {
-		reader = utils.CompressStream(file)
+		reader = utils.CompressStream(file, BlockSize)
 	} else {
 		reader = bufio.NewReader(file)
 	}
 
 	isLastBlock := false
 	for !isLastBlock {
-		fileBytes := make([]byte, blockSize)
+		fileBytes := make([]byte, BlockSize)
 		n, err := reader.Read(fileBytes)
 		if err != nil && err != io.EOF {
 			return err
 		}
-
 		isLastBlock = err == io.EOF
-		if err := s.sendFileBlock(ft, fileBytes[:n], isLastBlock, sendMoreCh); err != nil {
+		if err = s.sendFileBlock(ft, fileBytes[:n], isLastBlock, sendMoreCh); err != nil {
 			return err
 		}
 		err = bar.Add(n)
@@ -132,17 +122,13 @@ func (s *Sender) sendFileBlock(ft utils.FileTransfer, data []byte, isLastBlock b
 }
 
 func (s *Sender) transferConfirmation(ft utils.FileTransfer) error {
-	var fileResp *webrtc.DataChannelMessage
-	select {
-	case <-s.Session.Ctx.Done():
-		return fmt.Errorf("context cancelled while waiting for confirmation response")
-	case <-time.After(1 * time.Second):
-		return fmt.Errorf("timeout while waiting for confirmation response")
-	case fileResp = <-s.Session.MsgCh:
+	fileRespBytes, err := s.Session.ReceiveMessage(7 * time.Second)
+	if err != nil {
+		return err
 	}
 
 	var fileRespPB transferpb.TransferComplete
-	if err := proto.Unmarshal(fileResp.Data, &fileRespPB); err != nil {
+	if err = proto.Unmarshal(fileRespBytes, &fileRespPB); err != nil {
 		return err
 	}
 	if fileRespPB.TransferId != ft.TransferUUID.String() {

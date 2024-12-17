@@ -14,9 +14,13 @@ func (r *Receiver) ReceiveTransferInfo() (*controlpb.FileMetadataList, error) {
 		return nil, fmt.Errorf("context cancelled")
 	}
 
-	dcMSG := <-r.Session.MsgCh
+	dcMSG, err := r.Session.ReceiveMessage(DefaultTimeout)
+	if err != nil {
+		return nil, err
+	}
+
 	var fileMDList controlpb.FileMetadataList
-	if err := proto.Unmarshal(dcMSG.Data, &fileMDList); err != nil {
+	if err := proto.Unmarshal(dcMSG, &fileMDList); err != nil {
 		return nil, err
 	}
 
