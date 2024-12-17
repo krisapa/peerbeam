@@ -61,7 +61,6 @@ func (s *Sender) sendTransferInfo(ftList []utils.FileTransfer) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Sent transfer info")
 
 	return nil
 }
