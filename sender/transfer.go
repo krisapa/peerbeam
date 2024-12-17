@@ -14,7 +14,7 @@ import (
 const (
 	// BlockSize max size for a single packet is 65535 for pion/sctp
 	BlockSize                         = 65000
-	maxBufferedAmount          uint64 = 1024 * 1024 * 10 // 10 MB
+	maxBufferedAmount          uint64 = 1024 * 1024 // 1 MB
 	bufferedAmountLowThreshold        = maxBufferedAmount - BlockSize
 )
 
