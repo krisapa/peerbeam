@@ -3,7 +3,7 @@ package conn
 import (
 	"encoding/json"
 	"github.com/pion/webrtc/v4"
-	"log/slog"
+	log "github.com/sirupsen/logrus"
 )
 
 func (c *Session) DataChHandler(ch *webrtc.DataChannel) {
@@ -30,12 +30,12 @@ func (c *Session) CandidateChHandler(ch *webrtc.DataChannel) {
 		var candidate webrtc.ICECandidateInit
 		err := json.Unmarshal(msg.Data, &candidate)
 		if err != nil {
-			slog.Error("Error unmarshalling candidate:", err)
+			log.Errorln("Error unmarshalling candidate:", err)
 			return
 		}
 		err = c.Conn.AddICECandidate(candidate)
 		if err != nil {
-			slog.Error("Error adding ice candidate:", err)
+			log.Errorln("Error adding ice candidate:", err)
 		}
 	})
 }
@@ -55,12 +55,12 @@ func (c *Session) sendCandidatesHandler() {
 
 		candidateBytes, err := json.Marshal(candidate.ToJSON())
 		if err != nil {
-			slog.Error("Error marshalling candidate:", err)
+			log.Errorln("Error marshalling candidate:", err)
 			return
 		}
 		err = c.candidateCh.Send(candidateBytes)
 		if err != nil {
-			slog.Error("Error sending candidate:", err)
+			log.Errorln("Error sending candidate:", err)
 		}
 	})
 }

@@ -14,7 +14,8 @@ type Session struct {
 	candidateChOpen atomic.Bool
 	CandidateCond   *sync.Cond
 
-	DataCh     *webrtc.DataChannel
+	DataCh *webrtc.DataChannel
+
 	DataChOpen chan struct{}
 
 	Ctx       context.Context
@@ -26,11 +27,10 @@ type Session struct {
 func New() *Session {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Session{
-		Ctx:       ctx,
-		CtxCancel: cancel,
-		//StateMap:   make(map[webrtc.ICEConnectionState]chan struct{}),
-		MsgCh:         make(chan *webrtc.DataChannelMessage, 100),
+		Ctx:           ctx,
+		CtxCancel:     cancel,
 		DataChOpen:    make(chan struct{}, 10),
 		CandidateCond: sync.NewCond(&sync.Mutex{}),
+		MsgCh:         make(chan *webrtc.DataChannelMessage, 200),
 	}
 }

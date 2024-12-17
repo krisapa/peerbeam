@@ -3,7 +3,7 @@ package conn
 import (
 	"fmt"
 	"github.com/pion/webrtc/v4"
-	"log/slog"
+	log "github.com/sirupsen/logrus"
 )
 
 func (c *Session) SetupPeerConn() error {
@@ -27,13 +27,13 @@ func (c *Session) connClose() {
 	if c.DataCh != nil {
 		err := c.DataCh.GracefulClose()
 		if err != nil {
-			slog.Error("Error closing control channel:", err)
+			log.Error("Error closing control channel:", err)
 		}
 	}
 	if c.Conn == nil {
 		err := c.Conn.GracefulClose()
 		if err != nil {
-			slog.Error("Error closing peer connection:", err)
+			log.Errorln("Error closing peer connection:", err)
 		}
 	}
 }

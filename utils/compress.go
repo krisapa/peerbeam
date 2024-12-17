@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"bufio"
-	"compress/gzip"
+	"github.com/klauspost/compress/zstd"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,64 +9,51 @@ import (
 	"strings"
 )
 
-const pipeBufferSize = 64 * 1024
-
-func CompressStream(file *os.File) *io.PipeReader {
-	reader := bufio.NewReader(file)
+func CompressStream(file *os.File, blockSize int) *io.PipeReader {
 	pr, pw := io.Pipe()
-	go func() {
-		defer pw.Close()
-		gz := gzip.NewWriter(pw)
-		defer gz.Close()
+	enc, err := zstd.NewWriter(pw)
+	if err != nil {
+		pw.CloseWithError(err)
+		return nil
+	}
+	buf := make([]byte, blockSize)
 
-		buf := make([]byte, pipeBufferSize)
-		for {
-			n, err := reader.Read(buf)
-			if err != nil && err != io.EOF {
+	go func() {
+		defer func() {
+			err := enc.Close()
+			if err != nil {
 				pw.CloseWithError(err)
-				return
+			} else {
+				pw.Close()
 			}
-			if n == 0 {
-				break
-			}
-			if _, err = gz.Write(buf[:n]); err != nil {
-				pw.CloseWithError(err)
-				return
-			}
-			if err = gz.Flush(); err != nil {
-				pw.CloseWithError(err)
-				return
-			}
+		}()
+		_, err = io.CopyBuffer(enc, file, buf)
+		if err != nil {
+			pw.CloseWithError(err)
+			return
 		}
 	}()
 	return pr
 }
 
-func DecompressStream(dataReader io.Reader) *io.PipeReader {
+func DecompressStream(dataReader io.Reader, blockSize int) *io.PipeReader {
 	pr, pw := io.Pipe()
+	d, err := zstd.NewReader(dataReader)
+	if err != nil {
+		pw.CloseWithError(err)
+		return nil
+	}
+	buf := make([]byte, blockSize)
+
 	go func() {
-		defer pw.Close()
-		gz, err := gzip.NewReader(dataReader)
+		defer func() {
+			d.Close()
+			pw.Close()
+		}()
+		_, err = io.CopyBuffer(pw, d, buf)
 		if err != nil {
 			pw.CloseWithError(err)
 			return
-		}
-		defer gz.Close()
-
-		buf := make([]byte, pipeBufferSize)
-		for {
-			n, err := gz.Read(buf)
-			if err != nil && err != io.EOF {
-				pw.CloseWithError(err)
-				return
-			}
-			if n == 0 {
-				break
-			}
-			if _, err = pw.Write(buf[:n]); err != nil {
-				pw.CloseWithError(err)
-				return
-			}
 		}
 	}()
 	return pr
