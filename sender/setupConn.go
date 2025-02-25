@@ -1,6 +1,9 @@
 package sender
 
-import "github.com/6b70/peerbeam/utils"
+import (
+	"github.com/6b70/peerbeam/utils"
+	"github.com/pion/webrtc/v4"
+)
 
 func (s *Sender) SetupSenderConn() (string, error) {
 	err := s.Session.SetupPeerConn()
@@ -30,9 +33,13 @@ func (s *Sender) createOffer() (string, error) {
 		return "", err
 	}
 
-	s.Session.CandidateCond.L.Lock()
-	s.Session.CandidateCond.Wait()
-	s.Session.CandidateCond.L.Unlock()
+	gatherComplete := make(chan struct{})
+	s.Session.Conn.OnICEGatheringStateChange(func(state webrtc.ICEGatheringState) {
+		if state == webrtc.ICEGatheringStateComplete {
+			close(gatherComplete)
+		}
+	})
+	<-gatherComplete
 
 	sdpOffer := s.Session.Conn.LocalDescription()
 	encodedSDP, err := utils.EncodeSDP(sdpOffer)

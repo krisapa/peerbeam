@@ -48,9 +48,13 @@ func (r *Receiver) CreateAnswer(offer string) (string, error) {
 		return "", err
 	}
 
-	r.Session.CandidateCond.L.Lock()
-	r.Session.CandidateCond.Wait()
-	r.Session.CandidateCond.L.Unlock()
+	gatherComplete := make(chan struct{})
+	r.Session.Conn.OnICEGatheringStateChange(func(state webrtc.ICEGatheringState) {
+		if state == webrtc.ICEGatheringStateComplete {
+			close(gatherComplete)
+		}
+	})
+	<-gatherComplete
 
 	answer := r.Session.Conn.LocalDescription()
 
