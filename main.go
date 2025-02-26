@@ -3,16 +3,15 @@ package main
 import (
 	"github.com/6b70/peerbeam/cmd"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 func configureLogger() {
-	log.SetLevel(log.TraceLevel)
-	file, err := os.OpenFile("log/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal("无法创建日志文件: ", err)
-	}
-	log.SetOutput(file)
+	//log.SetLevel(log.TraceLevel)
+	//file, err := os.OpenFile("log/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	//if err != nil {
+	//	log.Fatal("无法创建日志文件: ", err)
+	//}
+	//log.SetOutput(file)
 	//log.SetLevel(log.TraceLevel)
 	//log.SetReportCaller(true)
 	//callerFormatter := func(f *runtime.Frame) string {
@@ -28,7 +27,6 @@ func configureLogger() {
 }
 
 func main() {
-	configureLogger()
 	err := cmd.App()
 	if err != nil {
 		log.Fatal(err)

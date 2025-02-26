@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/atotto/clipboard"
 	"github.com/aymanbagabas/go-osc52/v2"
 	"github.com/pion/webrtc/v4"
 	"io"
@@ -87,6 +88,6 @@ func ValidateSDP(input string) error {
 
 func CopyGeneratedSDPPrompt(sdp string) {
 	fmt.Println(sdp)
-	//clipboard.WriteAll(sdp)
+	clipboard.WriteAll(sdp)
 	osc52.New(sdp).WriteTo(os.Stderr)
 }

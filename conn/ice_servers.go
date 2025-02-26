@@ -3,7 +3,7 @@ package conn
 import "github.com/pion/webrtc/v4"
 
 var iceServers = []webrtc.ICEServer{
-	//{URLs: []string{"stun:101.34.238.168:3478"}},
+	{URLs: []string{"stun:101.34.238.168:3478"}},
 	{
 		URLs:           []string{"turn:101.34.238.168:3478"},
 		Username:       "ranber",

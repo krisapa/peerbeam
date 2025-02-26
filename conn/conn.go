@@ -2,23 +2,21 @@ package conn
 
 import (
 	"fmt"
-	"github.com/pion/logging"
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 func (c *Session) SetupPeerConn() error {
-	file, err := os.OpenFile("log/webrtc.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Failed to open log file: %s", err)
-	}
-	loggerFactory := logging.NewDefaultLoggerFactory()
-	loggerFactory.Writer = file
-	loggerFactory.DefaultLogLevel = logging.LogLevelTrace
+	//file, err := os.OpenFile("log/webrtc.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	//if err != nil {
+	//	log.Fatalf("Failed to open log file: %s", err)
+	//}
+	//loggerFactory := logging.NewDefaultLoggerFactory()
+	//loggerFactory.Writer = file
+	//loggerFactory.DefaultLogLevel = logging.LogLevelTrace
 
 	s := webrtc.SettingEngine{
-		LoggerFactory: loggerFactory,
+		//LoggerFactory: loggerFactory,
 	}
 	api := webrtc.NewAPI(webrtc.WithSettingEngine(s))
 	conn, err := api.NewPeerConnection(webrtc.Configuration{
