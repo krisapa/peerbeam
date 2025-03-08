@@ -20,8 +20,6 @@ func (r *Receiver) registerHandlers() {
 		switch ch.Label() {
 		case "data":
 			r.Session.DataChHandler(ch)
-		case "candidate":
-			r.Session.CandidateChHandler(ch)
 		default:
 			log.Errorln("Unknown channel label:", ch.Label())
 			return
@@ -30,7 +28,7 @@ func (r *Receiver) registerHandlers() {
 }
 
 func (r *Receiver) CreateAnswer(offer string) (string, error) {
-	offerSDP, err := utils.DecodeSDP(offer)
+	offerSDP, candidates, err := utils.DecodeSDP(offer)
 	if err != nil {
 		return "", err
 	}
@@ -47,14 +45,12 @@ func (r *Receiver) CreateAnswer(offer string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	r.Session.CandidateCond.L.Lock()
-	r.Session.CandidateCond.Wait()
-	r.Session.CandidateCond.L.Unlock()
+	r.Session.AddCandidates(candidates)
+	r.Session.WaitGatherComplete()
 
 	answer := r.Session.Conn.LocalDescription()
 
-	encodedSDP, err := utils.EncodeSDP(answer)
+	encodedSDP, err := utils.EncodeSDP(answer, r.Session.Candidates)
 	if err != nil {
 		return "", err
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Sender) ProposeTransfer(ftList []utils.FileTransfer, answerStr string) error {
-	remoteSDP, err := utils.DecodeSDP(answerStr)
+	remoteSDP, candidates, err := utils.DecodeSDP(answerStr)
 	if err != nil {
 		return err
 	}
@@ -19,7 +19,7 @@ func (s *Sender) ProposeTransfer(ftList []utils.FileTransfer, answerStr string) 
 	if err != nil {
 		return err
 	}
-
+	s.Session.AddCandidates(candidates)
 	select {
 	case <-s.Session.DataChOpen:
 		break
