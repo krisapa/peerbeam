@@ -1,27 +1,34 @@
 package main
 
 import (
+	"fmt"
 	"github.com/6b70/peerbeam/cmd"
 	log "github.com/sirupsen/logrus"
+	"os"
+	"path/filepath"
+	"runtime"
 )
 
-//func configureLogger() {
-//	log.SetLevel(log.TraceLevel)
-//	log.SetReportCaller(true)
-//	callerFormatter := func(f *runtime.Frame) string {
-//		s := strings.Split(f.Function, ".")
-//		funcName := s[len(s)-1]
-//		return fmt.Sprintf(" [%s:%d][%s()]", path.Base(f.File), f.Line, funcName)
-//	}
-//	log.SetFormatter(&nested.Formatter{
-//		TimestampFormat:       "2006-01-02 15:04:05",
-//		CallerFirst:           true,
-//		CustomCallerFormatter: callerFormatter,
-//	})
-//}
+func configureLogger() {
+	log.SetReportCaller(true) // 关键配置：启用调用者信息
+	log.SetFormatter(&log.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05", // 时间格式
+		FullTimestamp:   true,
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := filepath.Base(f.File)
+			return "", fmt.Sprintf("%s:%d", filename, f.Line)
+		},
+	})
+	log.SetLevel(log.TraceLevel)
+	file, err := os.OpenFile("log/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("无法创建日志文件: ", err)
+	}
+	log.SetOutput(file)
+}
 
 func main() {
-	//configureLogger()
+	configureLogger()
 	err := cmd.App()
 	if err != nil {
 		log.Fatal(err)
