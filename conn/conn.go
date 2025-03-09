@@ -14,10 +14,10 @@ func (c *Session) SetupPeerConn() error {
 		return err
 	}
 	c.Conn = conn
-	c.monitorState()
+	c.monitorConnectState()
+	c.monitorGatherState()
 	go c.connClose()
-	c.sendCandidatesHandler()
-
+	c.CandidatesHandler()
 	return nil
 }
 

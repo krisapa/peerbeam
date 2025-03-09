@@ -19,7 +19,7 @@ func startSender(files []string) error {
 		offer, err := s.SetupSenderConn()
 		if err != nil {
 			log.Errorln(err)
-			offerCh <- ""
+			close(offerCh)
 		}
 		offerCh <- offer
 	}()
@@ -82,10 +82,8 @@ func senderExchangeSDP(offer string) (string, error) {
 				Placeholder("Paste response here...").
 				Value(&answer).
 				Validate(func(s string) error {
-					if s == offer {
-						return fmt.Errorf("offer and answer cannot be the same")
-					}
-					return utils.ValidateSDP(s)
+					// here is no need to check
+					return nil
 				}),
 		),
 	)

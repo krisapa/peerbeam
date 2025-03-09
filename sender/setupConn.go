@@ -29,13 +29,9 @@ func (s *Sender) createOffer() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	s.Session.CandidateCond.L.Lock()
-	s.Session.CandidateCond.Wait()
-	s.Session.CandidateCond.L.Unlock()
-
 	sdpOffer := s.Session.Conn.LocalDescription()
-	encodedSDP, err := utils.EncodeSDP(sdpOffer)
+	s.Session.WaitGatherComplete()
+	encodedSDP, err := utils.EncodeSDP(sdpOffer, s.Session.Candidates)
 	if err != nil {
 		return "", err
 	}
@@ -49,12 +45,5 @@ func (s *Sender) createChs() error {
 		return err
 	}
 	s.Session.DataChHandler(ch)
-
-	ch, err = s.Session.Conn.CreateDataChannel("candidate", nil)
-	if err != nil {
-		return err
-	}
-	s.Session.CandidateChHandler(ch)
-
 	return nil
 }

@@ -86,7 +86,9 @@ func recvExchangeSDP() (string, error) {
 				CharLimit(5000).
 				Placeholder("Paste offer here...").
 				Value(&offer).
-				Validate(utils.ValidateSDP),
+				Validate(func(s string) error {
+					return nil
+				}),
 		),
 	)
 	err := form.Run()
