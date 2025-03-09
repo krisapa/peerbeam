@@ -20,6 +20,11 @@ func configureLogger() {
 		},
 	})
 	log.SetLevel(log.TraceLevel)
+	err := os.MkdirAll("log", os.ModePerm)
+	if err != nil {
+		log.Fatal("failed to create log directory: ", err)
+	}
+
 	file, err := os.OpenFile("log/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal("无法创建日志文件: ", err)
