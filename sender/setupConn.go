@@ -1,6 +1,6 @@
 package sender
 
-import "github.com/6b70/peerbeam/utils"
+import "github.com/krisapa/peerbeam/utils"
 
 func (s *Sender) SetupSenderConn() (string, error) {
 	err := s.Session.SetupPeerConn()

@@ -3,8 +3,8 @@ package sender
 import (
 	"bufio"
 	"fmt"
-	"github.com/6b70/peerbeam/proto/compiled/transferpb"
-	"github.com/6b70/peerbeam/utils"
+	"github.com/krisapa/peerbeam/proto/compiled/transferpb"
+	"github.com/krisapa/peerbeam/utils"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"os"

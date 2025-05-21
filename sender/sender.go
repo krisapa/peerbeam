@@ -1,7 +1,7 @@
 package sender
 
 import (
-	"github.com/6b70/peerbeam/conn"
+	"github.com/krisapa/peerbeam/conn"
 )
 
 type Sender struct {

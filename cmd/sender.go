@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/sender"
-	"github.com/6b70/peerbeam/utils"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
+	"github.com/krisapa/peerbeam/sender"
+	"github.com/krisapa/peerbeam/utils"
 	log "github.com/sirupsen/logrus"
 	"sync/atomic"
 )

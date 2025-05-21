@@ -1,7 +1,7 @@
 package receiver
 
 import (
-	"github.com/6b70/peerbeam/utils"
+	"github.com/krisapa/peerbeam/utils"
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
 )

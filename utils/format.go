@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/proto/compiled/controlpb"
+	"github.com/krisapa/peerbeam/proto/compiled/controlpb"
 	"strings"
 )
 

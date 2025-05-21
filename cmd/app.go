@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/conn"
+	"github.com/krisapa/peerbeam/conn"
 	"github.com/urfave/cli/v2"
 	"os"
 	"strconv"

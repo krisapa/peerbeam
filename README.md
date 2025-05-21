@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/9579b274-1067-42c8-b8c9-816e3168f6b4
 
 [Install Go](https://golang.org/dl/) then run:
 ```
-go install github.com/6b70/peerbeam@latest
+go install github.com/krisapa/peerbeam@latest
 ```
 This will install the `peerbeam` binary to your `$GOPATH/bin`.
 

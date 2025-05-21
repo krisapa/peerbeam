@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/cmd"
+	"github.com/krisapa/peerbeam/cmd"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"path/filepath"

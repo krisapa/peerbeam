@@ -2,8 +2,8 @@ package sender
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/proto/compiled/controlpb"
-	"github.com/6b70/peerbeam/utils"
+	"github.com/krisapa/peerbeam/proto/compiled/controlpb"
+	"github.com/krisapa/peerbeam/utils"
 	"google.golang.org/protobuf/proto"
 	"path/filepath"
 	"time"

@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/6b70/peerbeam/proto/compiled/controlpb"
-	"github.com/6b70/peerbeam/receiver"
-	"github.com/6b70/peerbeam/utils"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
+	"github.com/krisapa/peerbeam/proto/compiled/controlpb"
+	"github.com/krisapa/peerbeam/receiver"
+	"github.com/krisapa/peerbeam/utils"
 )
 
 func startReceiver(destPath string) error {

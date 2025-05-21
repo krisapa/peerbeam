@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package peerbeam.control;
 
-option go_package = "github.com/6b70/peerbeam/proto/compiled/controlpb";
+option go_package = "github.com/krisapa/peerbeam/proto/compiled/controlpb";
 
 message FileMetadata {
   string transfer_id = 1;

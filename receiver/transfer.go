@@ -2,10 +2,10 @@ package receiver
 
 import (
 	"fmt"
-	"github.com/6b70/peerbeam/proto/compiled/controlpb"
-	"github.com/6b70/peerbeam/proto/compiled/transferpb"
-	"github.com/6b70/peerbeam/sender"
-	"github.com/6b70/peerbeam/utils"
+	"github.com/krisapa/peerbeam/proto/compiled/controlpb"
+	"github.com/krisapa/peerbeam/proto/compiled/transferpb"
+	"github.com/krisapa/peerbeam/sender"
+	"github.com/krisapa/peerbeam/utils"
 	"github.com/schollz/progressbar/v3"
 	"google.golang.org/protobuf/proto"
 	"io"
